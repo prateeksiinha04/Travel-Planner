@@ -1,0 +1,837 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="AI_Travel_Planner.SiteMaster" %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - Travel Planner</title>
+
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --sidebar-width: 260px;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --hover-bg: #f1f5f9;
+        }
+
+        /* Dark Mode CSS Custom Variables Override */
+        body.dark-mode {
+            --bg-light: #0f172a;
+            --card-bg: #1e293b;
+            --sidebar-bg: #1e293b;
+            --border-color: #334155;
+            --text-dark: #f8fafc;
+            --text-muted: #94a3b8;
+            --hover-bg: #334155;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Fixed Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 1000;
+            box-sizing: border-box;
+            overflow-y: auto;
+            transition: background 0.25s ease, border-color 0.25s ease, width 0.2s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 0 8px;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .sidebar-brand-icon {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            background: #eff6ff;
+            color: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            border: 1px solid #dbeafe;
+        }
+
+        .nav-section-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 12px 6px 12px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-menu .nav-item {
+            margin-bottom: 3px;
+        }
+
+        .nav-menu .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.86rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-menu .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 0.98rem;
+        }
+
+        .nav-menu .nav-link:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-dark);
+        }
+
+        .nav-menu .nav-link.active {
+            background-color: var(--primary-blue);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+        }
+
+        /* Dark Mode Toggle Control */
+        .theme-switcher-wrapper {
+            padding: 0 4px;
+        }
+
+        .theme-btn {
+            width: 100%;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle-pill {
+            width: 36px;
+            height: 20px;
+            background: #cbd5e1;
+            border-radius: 20px;
+            padding: 2px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        body.dark-mode .theme-toggle-pill {
+            background: var(--primary-blue);
+        }
+
+        .theme-toggle-dot {
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        body.dark-mode .theme-toggle-dot {
+            transform: translateX(16px);
+        }
+
+        /* Sidebar CTA Banner */
+        .sidebar-cta {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        body.dark-mode .sidebar-cta {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            border: 1px solid #1e40af;
+        }
+
+        .sidebar-cta h6 {
+            font-weight: 800;
+            color: #1e3a8a;
+            margin: 0 0 4px 0;
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode .sidebar-cta h6 { color: #93c5fd; }
+
+        .sidebar-cta p {
+            color: #3b82f6;
+            font-size: 0.76rem;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+
+        body.dark-mode .sidebar-cta p { color: #bfdbfe; }
+
+        .btn-sidebar-cta {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 36px;
+        }
+
+        /* Top Header Bar */
+        .top-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .icon-btn .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+        }
+
+        /* Notifications Dropdown Styling */
+        .notification-dropdown-wrapper {
+            position: relative;
+        }
+
+        .notification-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 320px;
+            background: var(--card-bg);
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1060;
+            overflow: hidden;
+        }
+
+        .notification-menu.active { display: flex; }
+
+        .notif-header {
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 12px 18px;
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .notif-item:hover { background: var(--hover-bg); }
+
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .bg-primary-light { background: #eff6ff; color: #2563eb; }
+        .bg-success-light { background: #f0fdf4; color: #16a34a; }
+        .bg-warning-light { background: #fefce8; color: #ca8a04; }
+
+        .notif-content { display: flex; flex-direction: column; }
+        .notif-title { font-size: 0.84rem; font-weight: 700; color: var(--text-dark); }
+        .notif-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.3; margin: 2px 0; }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
+
+        /* User Profile Badge Header Element */
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            padding: 4px 12px 4px 4px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-profile-badge img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .logout-btn {
+            color: #ef4444;
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        /* Floating Chatbot Widget Styles */
+        .chat-widget-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            z-index: 1050;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .chat-widget-btn:hover { transform: scale(1.05); background: #1d4ed8; }
+
+        .chat-box-card {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 360px;
+            height: 480px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1050;
+            overflow: hidden;
+        }
+
+        .chat-box-card.active { display: flex; }
+
+        .chat-header {
+            background: #2563eb;
+            color: #ffffff;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-msg {
+            max-width: 82%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-msg.bot {
+            background: var(--card-bg);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-msg.user {
+            background: #2563eb;
+            color: #ffffff;
+            align-self: flex-end;
+        }
+
+        .chat-footer {
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-footer input {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .chat-footer button {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <form runat="server">
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+            </Scripts>
+        </asp:ScriptManager>
+
+        <!-- Streamlined Sidebar Navigation Menu -->
+        <aside class="sidebar" id="appSidebar">
+            <div>
+                <a class="sidebar-brand" runat="server" href="~/Dashboard.aspx">
+                    <div class="sidebar-brand-icon">
+                        <i class="fa-solid fa-plane-up"></i>
+                    </div>
+                    <span>TRAVEL<br />PLANNER</span>
+                </a>
+
+                <ul class="nav-menu">
+                    <!-- SECTION 1: EXPLORE & PLAN -->
+                    <li class="nav-section-label">Explore</li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("Dashboard.aspx") %>' runat="server" href="~/Dashboard.aspx">
+                            <i class="fa-solid fa-house"></i> <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("TripPlanner.aspx") %>' runat="server" href="~/TripPlanner.aspx">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="nav-text">Trip Planner</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("SavedPlaces.aspx") %>' runat="server" href="~/SavedPlaces.aspx">
+                            <i class="fa-solid fa-bookmark"></i> <span class="nav-text">Saved Places</span>
+                        </a>
+                    </li>
+
+                    <!-- SECTION 2: MY JOURNEYS & BOOKINGS -->
+                    <li class="nav-section-label">Management</li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("MyTrips.aspx") %>' runat="server" href="~/MyTrips.aspx">
+                            <i class="fa-solid fa-suitcase"></i> <span class="nav-text">My Trips & Stays</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("Bookings.aspx") %>' runat="server" href="~/Bookings.aspx">
+                            <i class="fa-solid fa-ticket"></i> <span class="nav-text">Bookings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("Budget.aspx") %>' runat="server" href="~/Budget.aspx">
+                            <i class="fa-solid fa-wallet"></i> <span class="nav-text">Budget & Packing</span>
+                        </a>
+                    </li>
+
+                    <!-- SECTION 3: ACCOUNT -->
+                    <li class="nav-section-label">Account</li>
+                    <li class="nav-item">
+                        <a class='<%# GetActiveCssClass("Profile.aspx") %>' runat="server" href="~/Profile.aspx">
+                            <i class="fa-solid fa-user-gear"></i> <span class="nav-text">Preferences</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <!-- Dark Mode Switcher Control -->
+                <div class="theme-switcher-wrapper my-2">
+                    <button type="button" class="theme-btn" id="themeToggleBtn" onclick="toggleDarkMode()">
+                        <div class="theme-btn-content">
+                            <i class="fa-solid fa-sun text-warning" id="themeSunIcon"></i>
+                            <i class="fa-solid fa-moon text-primary d-none" id="themeMoonIcon"></i>
+                            <span class="nav-text fw-bold fs-8 ms-1" id="themeModeLabel">Light Mode</span>
+                        </div>
+                        <div class="theme-toggle-pill">
+                            <div class="theme-toggle-dot"></div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Sidebar CTA Banner -->
+                <div class="sidebar-cta">
+                    <h6>Need Inspiration?</h6>
+                    <p>Let our assistant suggest your next vacation spot.</p>
+                    <a href="TripPlanner.aspx" class="btn-sidebar-cta">Plan New Trip</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <!-- Top Header Right Bar -->
+            <div class="top-header">
+                <div class="header-actions">
+                    <!-- Notifications Dropdown Wrapper -->
+                    <div class="notification-dropdown-wrapper">
+                        <button type="button" class="icon-btn" id="btnNotificationBell" onclick="toggleNotificationMenu(event)" title="Notifications">
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="badge-dot" id="notifBadge"></span>
+                        </button>
+
+                        <!-- Notification Menu Popup -->
+                        <div class="notification-menu" id="notificationMenu">
+                            <div class="notif-header">
+                                <span class="fw-bold fs-7">Notifications</span>
+                                <a href="javascript:void(0);" onclick="clearNotifications()" class="fs-8 text-primary fw-semibold text-decoration-none">Mark all read</a>
+                            </div>
+                            <div class="notif-body">
+                                <div class="notif-item unread">
+                                    <div class="notif-icon bg-primary-light text-primary">
+                                        <i class="fa-solid fa-plane-circle-check"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <span class="notif-title">Flight Price Drop Alert ✈️</span>
+                                        <span class="notif-desc">Delhi → Goa flight prices dropped by ₹1,200 today!</span>
+                                        <span class="notif-time">10 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="notif-item unread">
+                                    <div class="notif-icon bg-success-light text-success">
+                                        <i class="fa-solid fa-hotel"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <span class="notif-title">Booking Confirmed 🏨</span>
+                                        <span class="notif-desc">Taj Lake Palace, Udaipur advance payment received.</span>
+                                        <span class="notif-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="notif-item">
+                                    <div class="notif-icon bg-warning-light text-warning">
+                                        <i class="fa-solid fa-clipboard-check"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <span class="notif-title">Packing Checklist</span>
+                                        <span class="notif-desc">Don't forget to pack your universal adapter & power bank.</span>
+                                        <span class="notif-time">Yesterday</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logged-In User Profile Badge -->
+                    <div class="user-profile-badge">
+                        <asp:Image ID="imgMasterProfilePic" runat="server" AlternateText="User Profile Photo" />
+                        <span class="fw-bold fs-7">
+                            <asp:Label ID="lblMasterUserName" runat="server"></asp:Label>
+                        </span>
+
+                        <asp:LinkButton ID="btnLogout" runat="server" CssClass="logout-btn ms-1" OnClick="btnLogout_Click" ToolTip="Log Out">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </asp:LinkButton>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Placeholder for Child Pages -->
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+
+        <!-- Floating Chatbot Toggle Button -->
+        <button type="button" class="chat-widget-btn" onclick="toggleChatWindow()">
+            <i class="fa-solid fa-comment-dots"></i>
+        </button>
+
+        <!-- Chat Popup Window -->
+        <div class="chat-box-card" id="chatBox">
+            <div class="chat-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-robot"></i>
+                    <span class="fw-bold fs-7">Travel Assistant</span>
+                </div>
+                <i class="fa-solid fa-xmark fs-6" style="cursor:pointer;" onclick="toggleChatWindow()"></i>
+            </div>
+            
+            <div class="chat-body" id="chatBody">
+                <div class="chat-msg bot">
+                     👋 Hi there! Ask me anything about destinations (Paris, Bali, Goa, Taj Mahal), flight hacks, packing tips, or booking advice!
+                </div>
+            </div>
+
+            <div class="chat-footer">
+                <input type="text" id="chatInput" placeholder="Type your travel question..." onkeypress="handleKeyPress(event)" />
+                <button type="button" onclick="sendMessage()"><i class="fa-solid fa-paper-plane fs-8"></i></button>
+            </div>
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        // Dark Mode Initialization & Switcher Handler
+        (function () {
+            const savedTheme = localStorage.getItem('appTheme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark-mode');
+                if (document.body) document.body.classList.add('dark-mode');
+            }
+        })();
+
+        document.addEventListener("DOMContentLoaded", function () {
+            applyThemeUI();
+        });
+
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+            applyThemeUI();
+        }
+
+        function applyThemeUI() {
+            const isDark = document.body.classList.contains('dark-mode');
+            const sunIcon = document.getElementById('themeSunIcon');
+            const moonIcon = document.getElementById('themeMoonIcon');
+            const modeLabel = document.getElementById('themeModeLabel');
+
+            if (isDark) {
+                if (sunIcon) sunIcon.classList.add('d-none');
+                if (moonIcon) moonIcon.classList.remove('d-none');
+                if (modeLabel) modeLabel.innerText = 'Dark Mode';
+            } else {
+                if (moonIcon) moonIcon.classList.add('d-none');
+                if (sunIcon) sunIcon.classList.remove('d-none');
+                if (modeLabel) modeLabel.innerText = 'Light Mode';
+            }
+        }
+
+        // Notifications Dropdown Control
+        function toggleNotificationMenu(event) {
+            event.stopPropagation();
+            const notifMenu = document.getElementById('notificationMenu');
+            if (notifMenu) notifMenu.classList.toggle('active');
+        }
+
+        function clearNotifications() {
+            const badge = document.getElementById('notifBadge');
+            if (badge) badge.style.display = 'none';
+
+            const unreadItems = document.querySelectorAll('.notif-item.unread');
+            unreadItems.forEach(item => item.classList.remove('unread'));
+        }
+
+        document.addEventListener('click', function (e) {
+            const notifMenu = document.getElementById('notificationMenu');
+            const notifBtn = document.getElementById('btnNotificationBell');
+            if (notifMenu && notifMenu.classList.contains('active')) {
+                if (!notifMenu.contains(e.target) && (!notifBtn || !notifBtn.contains(e.target))) {
+                    notifMenu.classList.remove('active');
+                }
+            }
+        });
+
+        // Chatbot Widget Control
+        function toggleChatWindow() {
+            const chatBox = document.getElementById('chatBox');
+            if (chatBox) chatBox.classList.toggle('active');
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            if (!query) return;
+
+            const chatBody = document.getElementById('chatBody');
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-msg user';
+            userMsg.innerText = query;
+            chatBody.appendChild(userMsg);
+
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const typingMsg = document.createElement('div');
+            typingMsg.className = 'chat-msg bot';
+            typingMsg.id = 'typingIndicator';
+            typingMsg.innerText = 'Thinking... ✈️';
+            chatBody.appendChild(typingMsg);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            fetch(window.location.pathname + '/GetChatResponse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify({ userPrompt: query })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const indicator = document.getElementById('typingIndicator');
+                    if (indicator) indicator.remove();
+
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'chat-msg bot';
+                    botMsg.innerText = data.d;
+                    chatBody.appendChild(botMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                })
+                .catch(error => {
+                    const indicator = document.getElementById('typingIndicator');
+                    if (indicator) indicator.remove();
+
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'chat-msg bot';
+                    errorMsg.innerText = "I am ready to help! Ask me about flights, packing, or popular cities like Goa or Agra.";
+                    chatBody.appendChild(errorMsg);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                });
+        }
+    </script>
+
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/Scripts/bootstrap.js") %>
+    </asp:PlaceHolder>
+</body>
+</html>
