@@ -1,1 +1,1 @@
-# AI Travel Planner
+# Travel Planner
